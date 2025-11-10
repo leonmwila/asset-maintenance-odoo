@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Inherit Repair Order Form View to allow cross-company serial selection -->
+    <record id="view_repair_order_form_inherit_multicompany" model="ir.ui.view">
+        <field name="name">repair.order.form.inherit.multicompany</field>
+        <field name="model">repair.order</field>
+        <field name="inherit_id" ref="repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Remove company restriction from lot_id field -->
+            <xpath expr="//field[@name='lot_id']" position="attributes">
+                <attribute name="domain">[('product_id', '=', product_id)]</attribute>
+                <attribute name="context">{'default_product_id': product_id}</attribute>
+            </xpath>
+            
+            <!-- Add Parts Approval button after Confirm button -->
+            <xpath expr="//button[@name='action_validate']" position="after">
+                <button name="action_approve_parts" 
+                        string="Approve Parts" 
+                        type="object" 
+                        class="btn-primary"
+                        invisible="state != 'confirmed' or not move_ids or parts_approved"/>
+            </xpath>
+            
+            <!-- Modify Start Repair button to show only when parts are approved (if parts exist) -->
+            <xpath expr="//button[@name='action_repair_start']" position="attributes">
+                <attribute name="invisible">state != 'confirmed' and state != 'parts_approved' or (move_ids and not parts_approved)</attribute>
+            </xpath>
+            
+            <!-- Add parts approval information in the header -->
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="parts_approved" invisible="1"/>
+            </xpath>
+            
+            <!-- Add approval details after partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="parts_approved_by" readonly="1" invisible="not parts_approved"/>
+                <field name="parts_approved_date" readonly="1" invisible="not parts_approved"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

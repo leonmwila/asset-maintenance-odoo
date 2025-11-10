@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Inherit Stock Production Lot Form View to add GRZ Number -->
+    <record id="view_stock_production_lot_form_inherit_grz_number" model="ir.ui.view">
+        <field name="name">stock.production.lot.form.inherit.grz.number</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='main_group']//field[@name='company_id']" position="after">
+                <field name="program_id" string="Program"/>
+                <field name="project_id" string="Project"/>
+                <field name="grz_number" string="GRZ Number"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_stock_production_lot_tree_inherit_grz_number" model="ir.ui.view">
+        <field name="name">stock.production.lot.tree.inherit.grz.number</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='company_id']" position="after">
+                <field name="grz_number" string="GRZ Number"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

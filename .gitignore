@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Odoo specific
+*.pyc
+*.pyo
+filestore/
+sessions/
+
+# Database
+*.db
+
+# Log files
+*.log
+
+# Configuration files with sensitive data
+odoo.conf
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Exclude core Odoo - only track custom addons
+/odoo/
+/addons/
+/debian/
+/doc/
+/setup/
+odoo-bin
+CONTRIBUTING.md
+COPYRIGHT
+LICENSE
+MANIFEST.in
+README.md
+SECURITY.md
+setup.cfg
+setup.py
+requirements.txt
+ruff.toml

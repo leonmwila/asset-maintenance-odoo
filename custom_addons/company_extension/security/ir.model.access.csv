@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_province_user,res.province user,model_res_province,base.group_user,1,1,1,1
+access_res_district_user,res.district user,model_res_district,base.group_user,1,1,1,1
+access_res_serial_range,res.serial.range user,model_res_serial_range,base.group_user,1,1,1,1
+access_oe_program_user,oe.program user,model_oe_program,base.group_user,1,1,1,1
+access_oe_project_user,oe.project user,model_oe_project,base.group_user,1,1,1,1

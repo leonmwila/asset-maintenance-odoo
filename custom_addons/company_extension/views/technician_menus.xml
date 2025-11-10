@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <record id="action_technician_internal_transfers" model="ir.actions.act_window">
+        <field name="name">Spare Part Requests</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('picking_type_code','=','internal')]</field>
+    </record>
+
+    <menuitem id="menu_spare_part_request"
+        name="Spare Part Requests"
+        parent="stock.menu_stock_root"
+        action="action_technician_internal_transfers"
+        sequence="5"
+        groups="stock.group_stock_user"/>
+
+
+</odoo>
