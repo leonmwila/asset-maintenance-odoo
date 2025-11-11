@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+    networks:
+      - odoo-network
+
+  odoo:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./custom_addons:/mnt/extra-addons
+      - ./odoo-docker.conf:/etc/odoo/odoo.conf
+    restart: unless-stopped
+    networks:
+      - odoo-network
+
+networks:
+  odoo-network:
+    driver: bridge
+
+volumes:
+  odoo-db-data:
+  odoo-web-data:

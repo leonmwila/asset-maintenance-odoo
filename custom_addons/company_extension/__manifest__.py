@@ -3,7 +3,7 @@
     'version': '1.1',
     'category': 'Base',
     'summary': 'Adds Province, District, GRZ Number, and Company Type to Companies',
-    'depends': ['base','stock', 'product', 'repair'],
+    'depends': ['base','stock', 'product', 'repair', 'hr'],
     'data': [
         'security/ir.model.access.csv',
         'security/program_project.xml',

@@ -10,6 +10,7 @@
             <xpath expr="//group[@name='main_group']//field[@name='company_id']" position="after">
                 <field name="program_id" string="Program"/>
                 <field name="project_id" string="Project"/>
+                <field name="assigned_to" string="Assigned To"/>
                 <field name="grz_number" string="GRZ Number"/>
             </xpath>
         </field>

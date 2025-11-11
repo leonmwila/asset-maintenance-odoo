@@ -17,6 +17,7 @@ sessions/
 
 # Configuration files with sensitive data
 odoo.conf
+.env
 
 # Virtual environment
 venv/
@@ -33,6 +34,9 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker
+.env
 
 # Exclude core Odoo - only track custom addons
 /odoo/

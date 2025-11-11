@@ -6,6 +6,12 @@ class StockLot(models.Model):
     grz_number = fields.Char(string='GRZ Number', required=True)
     program_id = fields.Many2one('oe.program', string='Program', domain="[('company_id', '=', company_id)]")
     project_id = fields.Many2one('oe.project', string='Project', domain="[('company_id', '=', company_id)]")
+    assigned_to = fields.Many2one(
+        'hr.employee',
+        string='Assigned To',
+        domain="[('company_id', '=', company_id)]",
+        help="Employee to whom this serial number/equipment is assigned"
+    )
 
     @api.onchange('company_id', 'program_id', 'project_id', 'product_id')
     def _onchange_build_grz_number(self):
