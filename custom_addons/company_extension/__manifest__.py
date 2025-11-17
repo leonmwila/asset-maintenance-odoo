@@ -10,6 +10,7 @@
         'views/res_company_views.xml',
         'views/stock_production_lot_views.xml',
         'views/product_category_views.xml',
+        'views/product_category_2_views.xml',
         'views/programs_and_projects_views.xml',
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
