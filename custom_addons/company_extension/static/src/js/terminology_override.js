@@ -4,18 +4,19 @@ import { Component } from "@odoo/owl";
 
 // Terminology replacements mapping
 const TERM_REPLACEMENTS = {
-    'Company': 'Ministry',
-    'Companies': 'Ministries',
-    'Allowed Companies': 'Allowed Ministries',
-    'My Companies': 'My Ministries',
-    'Switch Company': 'Switch Ministry',
-    'Current Company': 'Current Ministry',
-    'Parent Company': 'Parent Ministry',
-    'Child Companies': 'Child Ministries',
-    'Company Name': 'Ministry Name',
-    'Company Settings': 'Ministry Settings',
-    'Users & Companies': 'Users & Ministries',
-    'User & Companies': 'Users & Ministries',
+    'Company': 'Institution',
+    'Companies': 'Institutions',
+    'Allowed Companies': 'Allowed Institutions',
+    'My Companies': 'My Institutions',
+    'Switch Company': 'Switch Institution',
+    'Current Company': 'Current Institution',
+    'Parent Company': 'Parent Institution',
+    'Child Companies': 'Child Institutions',
+    'Company Name': 'Institution Name',
+    'Company Settings': 'Institution Settings',
+    'Users & Companies': 'Users & Institutions',
+    'User & Companies': 'Users & Institutions',
+    'Cost': 'Acquisition Price',
 };
 
 // Function to replace company-related terms
@@ -29,7 +30,7 @@ function replaceCompanyTerms(text) {
     }
     
     // Also handle HTML entity version
-    result = result.replace(/Users\s*&\s*Companies/gi, 'Users & Ministries');
+    result = result.replace(/Users\s*&\s*Companies/gi, 'Users & Institutions');
     
     return result;
 }
@@ -48,7 +49,18 @@ function replaceInDOM() {
         '.o_menu_sections a',
         '.dropdown-item',
         'button',
-        'h1', 'h2', 'h3', 'h4'
+        'h1', 'h2', 'h3', 'h4',
+        '.o_menu_header',
+        '.o_menu_header_lvl_1',
+        'a.dropdown-item',
+        'span.dropdown-item',
+        'span[data-section]',  // Target Settings menu items
+        'button.dropdown-toggle span',  // Target dropdown button spans
+        '.o_import_field_name',  // Import field names
+        '.o_import_header_name',  // Import header names
+        'select option',  // Dropdown options
+        'td',  // Table cells (for import matching)
+        'div',  // Generic divs (for import interface)
     ];
     
     selectors.forEach(selector => {

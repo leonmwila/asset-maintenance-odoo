@@ -1,8 +1,8 @@
 {
     'name': 'Company Extension',
-    'version': '1.11',
+    'version': '1.17',
     'category': 'Base',
-    'summary': 'Adds Province, District, GRZ Number, Company Type, and Ministry terminology',
+    'summary': 'Adds Province, District, GRZ Number, Company Type, and Institution terminology',
     'depends': ['base','stock', 'product', 'repair', 'hr'],
     'data': [
         'security/ir.model.access.csv',
@@ -11,6 +11,7 @@
         'views/stock_production_lot_views.xml',
         'views/product_category_views.xml',
         'views/product_category_2_views.xml',
+        'views/product_template_views.xml',
         'views/programs_and_projects_views.xml',
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
