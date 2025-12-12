@@ -1,8 +1,8 @@
 {
     'name': 'Company Extension',
-    'version': '1.1',
+    'version': '1.17',
     'category': 'Base',
-    'summary': 'Adds Province, District, GRZ Number, and Company Type to Companies',
+    'summary': 'Adds Province, District, GRZ Number, Company Type, and Institution terminology',
     'depends': ['base','stock', 'product', 'repair', 'hr'],
     'data': [
         'security/ir.model.access.csv',
@@ -11,14 +11,17 @@
         'views/stock_production_lot_views.xml',
         'views/product_category_views.xml',
         'views/product_category_2_views.xml',
+        'views/product_template_views.xml',
         'views/programs_and_projects_views.xml',
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
+        'views/ministry_terminology.xml',
         'data/province_district_data.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'company_extension/static/src/scss/custom_theme.scss',
+            'company_extension/static/src/js/terminology_override.js',
         ],
     },
     'installable': True,
