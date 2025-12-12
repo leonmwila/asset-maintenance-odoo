@@ -55,3 +55,4 @@ setup.cfg
 setup.py
 requirements.txt
 ruff.toml
+odoo-docker.conf
