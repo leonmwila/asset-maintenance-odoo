@@ -12,6 +12,9 @@ class StockLot(models.Model):
         domain="[('company_id', '=', company_id)]",
         help="Employee to whom this serial number/equipment is assigned"
     )
+    # Related fields from company for export purposes
+    province_id = fields.Many2one('res.province', string='Province', related='company_id.province', readonly=True, store=True, help='Province of the company/institution')
+    district_id = fields.Many2one('res.district', string='District', related='company_id.district', readonly=True, store=True, help='District of the company/institution')
 
     @api.onchange('company_id', 'program_id', 'project_id', 'product_id')
     def _onchange_build_grz_number(self):

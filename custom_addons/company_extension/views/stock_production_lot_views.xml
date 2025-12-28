@@ -23,6 +23,8 @@
         <field name="arch" type="xml">
             <xpath expr="//list/field[@name='company_id']" position="after">
                 <field name="grz_number" string="GRZ Number"/>
+                <field name="province_id" string="Province" optional="hide"/>
+                <field name="district_id" string="District" optional="hide"/>
             </xpath>
         </field>
     </record>
