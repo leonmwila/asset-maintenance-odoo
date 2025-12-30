@@ -7,11 +7,19 @@
         <field name="model">stock.lot</field>
         <field name="inherit_id" ref="stock.view_production_lot_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='main_group']//field[@name='company_id']" position="after">
-                <field name="program_id" string="Program"/>
-                <field name="project_id" string="Project"/>
-                <field name="assigned_to" string="Assigned To"/>
-                <field name="grz_number" string="GRZ Number"/>
+            <xpath expr="//field[@name='company_id']" position="after">
+                <group>
+                    <field name="program_id" string="Program"/>
+                    <field name="project_id" string="Project"/>
+                    <field name="assigned_to" string="Assigned To"/>
+                    <field name="grz_number" string="GRZ Number"/>
+                </group>
+                <field name="is_vehicle" invisible="1"/>
+                <group string="Vehicle Information" invisible="not is_vehicle">
+                    <field name="vehicle_make" string="Make"/>
+                    <field name="engine_no" string="Engine No"/>
+                    <field name="plate_no" string="Plate No"/>
+                </group>
             </xpath>
         </field>
     </record>

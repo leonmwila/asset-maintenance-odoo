@@ -15,6 +15,28 @@ class StockLot(models.Model):
     # Related fields from company for export purposes
     province_id = fields.Many2one('res.province', string='Province', related='company_id.province', readonly=True, store=True, help='Province of the company/institution')
     district_id = fields.Many2one('res.district', string='District', related='company_id.district', readonly=True, store=True, help='District of the company/institution')
+    
+    # Vehicle-specific fields (only visible when product category is 'Vehicle')
+    vehicle_make = fields.Char(string='Make', help='Vehicle manufacturer/make (e.g., Toyota, Ford)')
+    engine_no = fields.Char(string='Engine No', help='Vehicle engine number')
+    plate_no = fields.Char(string='Plate No', help='Vehicle license plate number')
+    is_vehicle = fields.Boolean(string='Is Vehicle', compute='_compute_is_vehicle', store=False, help='True if the product category is Vehicle')
+
+    @api.depends('product_id', 'product_id.categ_id', 'product_id.categ_id.name')
+    def _compute_is_vehicle(self):
+        """Compute if the product category is Vehicle"""
+        for record in self:
+            record.is_vehicle = record.product_id and record.product_id.categ_id and record.product_id.categ_id.name.lower() == 'vehicle'
+    
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        """Clear vehicle fields when product changes and is not a vehicle"""
+        # Trigger computation of is_vehicle
+        self._compute_is_vehicle()
+        if not self.is_vehicle:
+            self.vehicle_make = False
+            self.engine_no = False
+            self.plate_no = False
 
     @api.onchange('company_id', 'program_id', 'project_id', 'product_id')
     def _onchange_build_grz_number(self):
