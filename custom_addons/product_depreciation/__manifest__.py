@@ -14,6 +14,7 @@
     """,
     'depends': ['product', 'stock'],
     'data': [
+        'data/ir_model_data.xml',
         'security/ir.model.access.csv',
         'views/product_template_views.xml',
         'views/product_serial_status_views.xml',
