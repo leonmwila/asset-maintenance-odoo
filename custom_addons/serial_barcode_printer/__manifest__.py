@@ -1,6 +1,6 @@
 {
     'name': 'Serial Number Barcode Printer',
-    'version': '1.0',
+    'version': '1.3',
     'category': 'Inventory',
     'summary': 'Print barcode labels for Lot/Serial Numbers',
     'description': """

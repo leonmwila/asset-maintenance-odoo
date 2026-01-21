@@ -1,6 +1,6 @@
 {
     'name': 'Company Extension',
-    'version': '1.17',
+    'version': '1.21',
     'category': 'Base',
     'summary': 'Adds Province, District, GRZ Number, Company Type, and Institution terminology',
     'depends': ['base','stock', 'product', 'repair', 'hr'],
@@ -24,6 +24,7 @@
             'company_extension/static/src/js/terminology_override.js',
         ],
     },
+    'post_init_hook': '_generate_grz_numbers',
     'installable': True,
     'application': True,
 }

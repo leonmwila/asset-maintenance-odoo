@@ -5,3 +5,4 @@ access_res_serial_range,res.serial.range user,model_res_serial_range,base.group_
 access_oe_program_user,oe.program user,model_oe_program,base.group_user,1,1,1,1
 access_oe_project_user,oe.project user,model_oe_project,base.group_user,1,1,1,1
 access_product_category_2_user,product.category.2 user,model_product_category_2,base.group_user,1,1,1,1
+access_grz_available_number_user,grz.available.number user,model_grz_available_number,base.group_user,1,1,1,1

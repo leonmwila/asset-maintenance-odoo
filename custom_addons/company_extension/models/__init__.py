@@ -1,6 +1,7 @@
 from . import res_company
 from . import res_location
 from . import res_serial_range
+from . import grz_available_number
 from . import stock_lot
 from . import product_category
 from . import product_category_2
