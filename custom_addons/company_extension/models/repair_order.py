@@ -26,6 +26,81 @@ class RepairOrder(models.Model):
     parts_approved = fields.Boolean(string="Parts Approved", default=False, tracking=True)
     parts_approved_by = fields.Many2one('res.users', string="Parts Approved By", readonly=True, tracking=True)
     parts_approved_date = fields.Datetime(string="Parts Approval Date", readonly=True, tracking=True)
+    
+    # Add Operations/Services fees
+    fees_lines = fields.One2many('repair.fee', 'repair_id', string='Operations')
+    currency_id = fields.Many2one('res.currency', string='Currency', 
+                                   default=lambda self: self.env.company.currency_id)
+    fees_amount = fields.Monetary(string='Operations Total', compute='_compute_fees_amount', store=True)
+    parts_amount = fields.Monetary(string='Parts Total', compute='_compute_parts_amount', store=True)
+    total_amount = fields.Monetary(string='Total', compute='_compute_total_amount', store=True)
+    
+    # Payment tracking fields
+    payment_state = fields.Selection([
+        ('not_paid', 'Not Paid'),
+        ('partial', 'Partially Paid'),
+        ('paid', 'Paid'),
+    ], string='Payment Status', default='not_paid', tracking=True)
+    paid_amount = fields.Monetary(string='Paid Amount', default=0.0, tracking=True)
+    balance_amount = fields.Monetary(string='Balance', compute='_compute_balance_amount', store=True)
+    payment_date = fields.Date(string='Payment Date', tracking=True)
+    payment_method = fields.Selection([
+        ('cash', 'Cash'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('mobile_money', 'Mobile Money'),
+        ('cheque', 'Cheque'),
+        ('card', 'Card'),
+    ], string='Payment Method', tracking=True)
+    payment_reference = fields.Char(string='Payment Reference', tracking=True)
+    received_by = fields.Many2one('res.users', string='Received By', tracking=True)
+    
+    @api.depends('fees_lines.price_subtotal')
+    def _compute_fees_amount(self):
+        for repair in self:
+            repair.fees_amount = sum(repair.fees_lines.mapped('price_subtotal'))
+    
+    @api.depends('move_ids', 'move_ids.product_id')
+    def _compute_parts_amount(self):
+        """Compute total cost of parts used"""
+        for repair in self:
+            total = 0.0
+            for move in repair.move_ids:
+                # Use product cost from product
+                cost = move.product_id.standard_price if move.product_id else 0.0
+                total += cost * move.product_uom_qty
+            repair.parts_amount = total
+    
+    @api.depends('fees_amount', 'parts_amount')
+    def _compute_total_amount(self):
+        for repair in self:
+            repair.total_amount = repair.fees_amount + repair.parts_amount
+    
+    @api.depends('total_amount', 'paid_amount')
+    def _compute_balance_amount(self):
+        for repair in self:
+            repair.balance_amount = repair.total_amount - repair.paid_amount
+    
+    @api.onchange('paid_amount', 'total_amount')
+    def _onchange_paid_amount(self):
+        """Auto-update payment state based on paid amount"""
+        for repair in self:
+            if repair.paid_amount <= 0:
+                repair.payment_state = 'not_paid'
+            elif repair.paid_amount >= repair.total_amount:
+                repair.payment_state = 'paid'
+            else:
+                repair.payment_state = 'partial'
+    
+    def action_mark_paid(self):
+        """Mark repair as fully paid"""
+        for repair in self:
+            repair.write({
+                'paid_amount': repair.total_amount,
+                'payment_state': 'paid',
+                'payment_date': fields.Date.today(),
+                'received_by': self.env.user.id,
+            })
+        return True
 
     def action_validate(self):
         """Override to skip stock check for cross-company repairs"""

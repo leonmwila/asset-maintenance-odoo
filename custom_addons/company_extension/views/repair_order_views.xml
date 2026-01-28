@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- Repair Fee Tree View -->
+    <record id="view_repair_fee_tree" model="ir.ui.view">
+        <field name="name">repair.fee.tree</field>
+        <field name="model">repair.fee</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="product_id" optional="show"/>
+                <field name="name" required="1"/>
+                <field name="product_uom_qty" string="Qty"/>
+                <field name="price_unit" required="1"/>
+                <field name="price_subtotal" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
     <!-- Inherit Repair Order Form View to allow cross-company serial selection -->
     <record id="view_repair_order_form_inherit_multicompany" model="ir.ui.view">
         <field name="name">repair.order.form.inherit.multicompany</field>
@@ -19,6 +36,11 @@
                         type="object" 
                         class="btn-primary"
                         invisible="state != 'confirmed' or not move_ids or parts_approved"/>
+                <button name="action_mark_paid" 
+                        string="Mark as Paid" 
+                        type="object" 
+                        class="btn-success"
+                        invisible="state not in ('done', 'confirmed', 'under_repair') or payment_state == 'paid'"/>
             </xpath>
             
             <!-- Modify Start Repair button to show only when parts are approved (if parts exist) -->
@@ -35,6 +57,41 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="parts_approved_by" readonly="1" invisible="not parts_approved"/>
                 <field name="parts_approved_date" readonly="1" invisible="not parts_approved"/>
+            </xpath>
+            
+            <!-- Add Operations/Services tab after Parts tab -->
+            <xpath expr="//page[@name='parts']" position="after">
+                <page string="Operations" name="operations">
+                    <field name="fees_lines" context="{'default_repair_id': id}"/>
+                </page>
+                <page string="Payment" name="payment">
+                    <group>
+                        <group>
+                            <field name="payment_state" widget="badge" 
+                                   decoration-success="payment_state == 'paid'"
+                                   decoration-warning="payment_state == 'partial'"
+                                   decoration-danger="payment_state == 'not_paid'"/>
+                            <field name="paid_amount" widget="monetary"/>
+                            <field name="balance_amount" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="payment_date"/>
+                            <field name="payment_method"/>
+                            <field name="payment_reference"/>
+                            <field name="received_by" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            
+            <!-- Add totals at the bottom of the form -->
+            <xpath expr="//page[@name='parts']" position="after">
+                <group name="repair_totals" col="4" class="oe_subtotal_footer oe_right">
+                    <field name="currency_id" invisible="1"/>
+                    <field name="parts_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="fees_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="total_amount" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_subtotal_footer_separator"/>
+                </group>
             </xpath>
         </field>
     </record>

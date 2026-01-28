@@ -1,6 +1,6 @@
 {
     'name': 'Company Extension',
-    'version': '1.21',
+    'version': '1.26',
     'category': 'Base',
     'summary': 'Adds Province, District, GRZ Number, Company Type, and Institution terminology',
     'depends': ['base','stock', 'product', 'repair', 'hr'],
@@ -16,6 +16,8 @@
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
         'views/ministry_terminology.xml',
+        'report/repair_order_reports.xml',
+        'report/repair_order_templates.xml',
         'data/province_district_data.xml',
     ],
     'assets': {
