@@ -4,6 +4,11 @@ from odoo import models, fields, api
 class StockLot(models.Model):
     _inherit = 'stock.lot'
 
+    # Override field labels for UI display (must include comodel_name for Many2one fields)
+    name = fields.Char(string='Serial Number')
+    product_id = fields.Many2one('product.product', string='Description')
+    company_id = fields.Many2one('res.company', string='Institution')
+    
     grz_number = fields.Char(string='GRZ Number', required=False)
     grz_number_b = fields.Many2one(
         'grz.available.number',
@@ -21,7 +26,11 @@ class StockLot(models.Model):
     )
     # Related fields from company for export purposes
     province_id = fields.Many2one('res.province', string='Province', related='company_id.province', readonly=True, store=True, help='Province of the company/institution')
-    district_id = fields.Many2one('res.district', string='District', related='company_id.district', readonly=True, store=True, help='District of the company/institution')
+    district_id = fields.Many2one('res.district', string='Station', related='company_id.district', readonly=True, store=True, help='District of the company/institution')
+    product_model = fields.Char(string='Model', related='product_id.model', readonly=True, store=True, help='Model of the product/asset')
+    standard_price = fields.Float(string='Acquisition Price', related='product_id.standard_price', readonly=True, store=True, help='Cost/Acquisition price of the product')
+    categ_id = fields.Many2one('product.category', string='Category', related='product_id.categ_id', readonly=True, store=True, help='Product category')
+    category_2_id = fields.Many2one('product.category.2', string='Description Category 2', related='product_id.product_tmpl_id.category_2_id', readonly=True, store=True, help='Product Category 2')
     
     # Vehicle-specific fields (only visible when product category is 'Vehicle')
     vehicle_make = fields.Char(string='Make', help='Vehicle manufacturer/make (e.g., Toyota, Ford)')

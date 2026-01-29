@@ -1,6 +1,6 @@
 {
     'name': 'Company Extension',
-    'version': '1.26',
+    'version': '1.40',
     'category': 'Base',
     'summary': 'Adds Province, District, GRZ Number, Company Type, and Institution terminology',
     'depends': ['base','stock', 'product', 'repair', 'hr'],

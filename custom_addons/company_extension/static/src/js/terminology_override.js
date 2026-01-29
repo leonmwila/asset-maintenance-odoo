@@ -17,6 +17,10 @@ const TERM_REPLACEMENTS = {
     'Users & Companies': 'Users & Institutions',
     'User & Companies': 'Users & Institutions',
     'Cost': 'Acquisition Price',
+    // Assets list view specific replacements
+    'Product Name': 'Description',
+    'Product': 'Description',
+    'District': 'Station',
 };
 
 // Function to replace company-related terms
@@ -43,6 +47,9 @@ function replaceInDOM() {
         '.o_field_label',
         'th',
         '.o_list_header',
+        '.o_column_title',
+        '.o_list_view th',
+        'thead th',
         '.breadcrumb',
         '.o_control_panel',
         'span.o_menu_brand',
@@ -76,6 +83,22 @@ function replaceInDOM() {
                             }
                         }
                     });
+                }
+                
+                // Also replace in title/aria-label attributes for table headers
+                if (element.hasAttribute('title')) {
+                    const originalTitle = element.getAttribute('title');
+                    const replacedTitle = replaceCompanyTerms(originalTitle);
+                    if (originalTitle !== replacedTitle) {
+                        element.setAttribute('title', replacedTitle);
+                    }
+                }
+                if (element.hasAttribute('aria-label')) {
+                    const originalLabel = element.getAttribute('aria-label');
+                    const replacedLabel = replaceCompanyTerms(originalLabel);
+                    if (originalLabel !== replacedLabel) {
+                        element.setAttribute('aria-label', replacedLabel);
+                    }
                 }
             });
         } catch (e) {

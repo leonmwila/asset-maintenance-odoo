@@ -82,3 +82,35 @@ msgstr "Ministry Settings"
 #. module: base
 msgid "Company Information"
 msgstr "Ministry Information"
+
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_lot__product_id
+msgid "Product"
+msgstr "Description"
+
+#. module: stock
+msgid "Product Name"
+msgstr "Description"
+
+#. module: stock
+msgid "Lot/Serial Number"
+msgstr "Serial Number"
+
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_lot__name
+msgid "Lot/Serial Number"
+msgstr "Serial Number"
+
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_lot__company_id
+msgid "Company"
+msgstr "Institution"
+
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_lot__district_id
+msgid "District"
+msgstr "Station"
+
+#. module: stock
+msgid "Cost"
+msgstr "Acquisition Price"
