@@ -34,6 +34,8 @@ class RepairOrder(models.Model):
     fees_amount = fields.Monetary(string='Operations Total', compute='_compute_fees_amount', store=True)
     parts_amount = fields.Monetary(string='Parts Total', compute='_compute_parts_amount', store=True)
     total_amount = fields.Monetary(string='Total', compute='_compute_total_amount', store=True)
+    # Link to automatically created invoice (customer invoice)
+    invoice_id = fields.Many2one('account.move', string='Invoice', copy=False, readonly=True)
     
     # Payment tracking fields
     payment_state = fields.Selection([
@@ -182,3 +184,80 @@ class RepairOrder(models.Model):
         else:
             # For same-company repairs, use standard process
             return super(RepairOrder, self).action_repair_done()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Create repair orders and automatically generate a customer invoice for each new repair.
+
+        The invoice is created from operations/fees lines and parts (move_ids) when present.
+        """
+        records = super(RepairOrder, self).create(vals_list)
+        invoices = self.env['account.move']
+        for rec in records:
+            try:
+                inv_vals = rec._prepare_invoice_vals()
+                if inv_vals and inv_vals.get('invoice_line_ids'):
+                    inv = self.env['account.move'].sudo().create(inv_vals)
+                    # Link invoice to repair
+                    rec.invoice_id = inv.id
+                    invoices |= inv
+            except Exception:
+                # Don't block repair creation if invoicing fails; log and continue
+                _logger = getattr(self, '_logger', None) or __import__('logging').getLogger('odoo.addons.company_extension')
+                _logger.exception('Failed to auto-create invoice for Repair Order %s', rec.name)
+        return records
+
+    def _prepare_invoice_vals(self):
+        """Prepare `account.move` values for this repair order.
+
+        Returns dict usable with `account.move.create()`.
+        """
+        self.ensure_one()
+        # Basic invoice header
+        partner = self.partner_id or self.picking_id.partner_id
+        if not partner:
+            return {}
+        currency = self.currency_id.id if hasattr(self, 'currency_id') and self.currency_id else (self.env.company.currency_id.id)
+        invoice_vals = {
+            'move_type': 'out_invoice',
+            'partner_id': partner.id,
+            'invoice_origin': self.name,
+            'invoice_user_id': self.user_id.id if self.user_id else self.env.user.id,
+            'company_id': self.company_id.id if self.company_id else self.env.company.id,
+            'currency_id': currency,
+            'invoice_line_ids': [],
+        }
+
+        # Add fee lines (operations/services)
+        for fee in self.fees_lines:
+            line = {
+                'name': fee.name or (fee.product_id.name if fee.product_id else 'Operation'),
+                'product_id': fee.product_id.id if fee.product_id else False,
+                'quantity': fee.product_uom_qty or 1.0,
+                'price_unit': fee.price_unit or 0.0,
+                'tax_ids': [(6, 0, fee.tax_id.ids)] if fee.tax_id else False,
+            }
+            invoice_vals['invoice_line_ids'].append((0, 0, line))
+
+        # Add parts lines (stock moves)
+        for move in self.move_ids.filtered(lambda m: m.product_uom_qty):
+            product = move.product_id
+            if not product:
+                continue
+            # Use sale price (list price) as default unit price
+            price_unit = getattr(product, 'list_price', 0.0) or 0.0
+            # Taxes from product
+            taxes = product.taxes_id.ids if hasattr(product, 'taxes_id') else []
+            line = {
+                'name': product.name,
+                'product_id': product.id,
+                'quantity': move.product_uom_qty,
+                'price_unit': price_unit,
+                'tax_ids': [(6, 0, taxes)] if taxes else False,
+            }
+            invoice_vals['invoice_line_ids'].append((0, 0, line))
+
+        # If no lines to invoice, return empty dict
+        if not invoice_vals['invoice_line_ids']:
+            return {}
+        return invoice_vals

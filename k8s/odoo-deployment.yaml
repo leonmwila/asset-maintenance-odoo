@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      containers:
+        - name: odoo
+          image: asset-maintenance-odoo:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: HOST
+              value: db
+            - name: USER
+              valueFrom:
+                secretKeyRef:
+                  name: odoo-db-secret
+                  key: POSTGRES_USER
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odoo-db-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: odoo-data
+              mountPath: /var/lib/odoo
+            - name: odoo-config
+              mountPath: /etc/odoo/odoo.conf
+              subPath: odoo.conf
+      volumes:
+        - name: odoo-data
+          persistentVolumeClaim:
+            claimName: odoo-pvc
+        - name: odoo-config
+          configMap:
+            name: odoo-config
+            items:
+              - key: odoo.conf
+                path: odoo.conf

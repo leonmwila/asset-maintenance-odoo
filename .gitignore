@@ -56,3 +56,14 @@ setup.py
 requirements.txt
 ruff.toml
 odoo-docker.conf
+
+# Exclude specific OM addons
+/custom_addons/om_account_accountant/
+/custom_addons/om_account_asset/
+/custom_addons/om_account_budget/
+/custom_addons/om_account_daily_reports/
+/custom_addons/om_account_followup/
+/custom_addons/om_fiscal_year/
+/custom_addons/om_recurring_payments/
+/custom_addons/accounting_pdf_reports/
+/custom_addons/asset_management/
