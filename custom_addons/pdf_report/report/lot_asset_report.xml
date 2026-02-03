@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_lot_asset_pdf" model="ir.actions.report">
+        <field name="name">Print PDF Report</field>
+        <field name="model">stock.lot</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pdf_report.report_lot_asset_document</field>
+        <field name="report_file">pdf_report.report_lot_asset_document</field>
+        <field name="binding_model_id" ref="stock.model_stock_lot"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Asset Report - %s' % (object.company_id.name or '')</field>
+    </record>
+
+    <template id="report_lot_asset_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="generated_on" t-value="time.strftime('%B %d, %Y / %I:%M %p')"/>
+                <t t-set="company_ids" t-value="docs.mapped('company_id')"/>
+                <t t-set="company_ids" t-value="company_ids or env.company"/>
+
+                <t t-if="docs">
+                    <t t-foreach="company_ids" t-as="company">
+                        <t t-set="company_docs" t-value="docs.filtered(lambda d: d.company_id == company)"/>
+                        <div class="page">
+                            <div class="text-center" style="margin-bottom: 8px;">
+                                <h3 style="margin: 0;">Smart Zambia Institute</h3>
+                                <div style="font-size: 14px; font-weight: 600;">Office Equipment and Maintenance</div>
+                                <div style="font-size: 12px;">Institution: <t t-esc="company.name"/></div>
+                                <div t-if="company.street" style="font-size: 12px;">
+                                    <t t-esc="company.street"/>
+                                </div>
+                            </div>
+
+                            <table class="table table-sm" style="font-size: 11px; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 3%;">Srl</th>
+                                        <th style="width: 10%;">GRZ Number</th>
+                                        <th style="width: 14%;">Machine Type</th>
+                                        <th style="width: 16%;">Serial Number</th>
+                                        <th style="width: 12%;">Make</th>
+                                        <th style="width: 12%;">Model</th>
+                                        <th style="width: 12%;">Registration Date</th>
+                                        <th style="width: 15%;">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="company_docs" t-as="line" t-index="row_index">
+                                        <tr>
+                                            <td><t t-esc="(row_index or 0) + 1"/></td>
+                                            <td><t t-esc="line.grz_number or ''"/></td>
+                                            <td><t t-esc="line.product_id.categ_id.name or ''"/></td>
+                                            <td><t t-esc="line.name"/></td>
+                                            <td><t t-esc="line.vehicle_make or ''"/></td>
+                                            <td><t t-esc="line.product_model or ''"/></td>
+                                            <td><t t-esc="line.create_date.strftime('%d/%m/%Y') if line.create_date else ''"/></td>
+                                            <td><t t-esc="line.district_id.name if line.district_id else ''"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <div style="font-size: 10px; margin-top: 8px;">
+                                Generation Date/Time: <t t-esc="generated_on"/>
+                                <span style="float: right;">Page <span class="page"/> of <span class="topage"/></span>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <t t-else="">
+                    <div class="page" style="font-size: 12px;">No assets selected for this report.</div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
