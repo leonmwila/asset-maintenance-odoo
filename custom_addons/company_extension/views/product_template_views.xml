@@ -12,6 +12,17 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_product_template_form_disable_categ_quick_create" model="ir.ui.view">
+        <field name="name">product.template.form.disable.categ.quick.create</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="attributes">
+                <attribute name="options">{'no_quick_create': True}</attribute>
+            </xpath>
+        </field>
+    </record>
     
     <!-- Rename Cost to Acquisition Price using terminology override -->
 </odoo>

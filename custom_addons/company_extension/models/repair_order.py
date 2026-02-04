@@ -11,11 +11,34 @@ class RepairOrder(models.Model):
     # Override the lot_id field to remove company restrictions
     lot_id = fields.Many2one(
         'stock.lot',
-        'Lot/Serial',
-        domain="[('product_id', '=', product_id)]",  # Only filter by product, not company
+        'Asset Serial',
+        domain="[('product_id', '=', product_id)]",  # Base filter; refined by onchange
         check_company=False,  # Disable company consistency check
-        help="Serial number of the product to repair. This field shows serial numbers from all companies."
+        help="Serial number of the asset to repair. This field shows serial numbers from all companies."
     )
+
+    def _get_repair_lot_domain(self):
+        """Return lot domain based on selected asset and customer."""
+        domain = []
+        if self.product_id:
+            domain.append(('product_id', '=', self.product_id.id))
+        if self.partner_id:
+            domain.append(('company_id.partner_id', 'child_of', self.partner_id.id))
+        return domain
+
+    @api.onchange('partner_id', 'product_id')
+    def _onchange_partner_product_lot_domain(self):
+        domain = []
+        for repair in self:
+            domain = repair._get_repair_lot_domain()
+            if repair.lot_id:
+                partner_ok = not repair.partner_id or (
+                    repair.lot_id.company_id and repair.lot_id.company_id.partner_id and
+                    repair.lot_id.company_id.partner_id in repair.partner_id.child_ids | repair.partner_id
+                )
+                if repair.lot_id.product_id != repair.product_id or not partner_ok:
+                    repair.lot_id = False
+        return {'domain': {'lot_id': domain}}
     
     # Add new state for parts approval
     state = fields.Selection(

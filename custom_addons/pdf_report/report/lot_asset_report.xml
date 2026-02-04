@@ -45,9 +45,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-foreach="company_docs" t-as="line" t-index="row_index">
+                                    <t t-set="row_index" t-value="0"/>
+                                    <t t-foreach="company_docs" t-as="line">
+                                        <t t-set="row_index" t-value="row_index + 1"/>
                                         <tr>
-                                            <td><t t-esc="(row_index or 0) + 1"/></td>
+                                            <td><t t-esc="row_index"/></td>
                                             <td><t t-esc="line.grz_number or ''"/></td>
                                             <td><t t-esc="line.product_id.categ_id.name or ''"/></td>
                                             <td><t t-esc="line.name"/></td>
