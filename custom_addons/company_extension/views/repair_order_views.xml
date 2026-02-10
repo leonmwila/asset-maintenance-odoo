@@ -21,6 +21,7 @@
     <record id="view_repair_order_form_inherit_multicompany" model="ir.ui.view">
         <field name="name">repair.order.form.inherit.multicompany</field>
         <field name="model">repair.order</field>
+        <field name="priority" eval="90"/>
         <field name="inherit_id" ref="repair.view_repair_order_form"/>
         <field name="arch" type="xml">
             <!-- Remove company restriction from lot_id field -->
@@ -36,21 +37,51 @@
                         type="object" 
                         class="btn-primary"
                         invisible="state != 'confirmed' or not move_ids or parts_approved"/>
-                <button name="action_mark_paid" 
-                        string="Mark as Paid" 
-                        type="object" 
-                        class="btn-success"
-                        invisible="state not in ('done', 'confirmed', 'under_repair') or payment_state == 'paid'"/>
+        <button name="action_open_transfer_request_wizard"
+            string="Transfer Request"
+            type="object"
+            class="btn-secondary"
+            invisible="state not in ('confirmed', 'under_repair')"/>
+        <button name="action_approve_transfer_request"
+            string="Approve Transfer"
+            type="object"
+            class="btn-primary"
+            invisible="not has_pending_transfer_request"/>
+        <button name="action_open_return_request_wizard"
+            string="Return Request"
+            type="object"
+            class="btn-secondary"
+            invisible="state != 'transferred'"/>
+        <button name="action_approve_return_request"
+            string="Approve Return"
+            type="object"
+            class="btn-primary"
+            invisible="not has_pending_return_request"/>
             </xpath>
             
             <!-- Modify Start Repair button to show only when parts are approved (if parts exist) -->
             <xpath expr="//button[@name='action_repair_start']" position="attributes">
                 <attribute name="invisible">state != 'confirmed' and state != 'parts_approved' or (move_ids and not parts_approved)</attribute>
             </xpath>
+
+            <xpath expr="//button[@name='action_repair_end']" position="replace"/>
+            <xpath expr="//header" position="inside">
+                <button name="action_open_end_repair_wizard"
+                        invisible="state not in ('under_repair', 'returned')"
+                        type="object"
+                        string="End Repair"
+                        class="oe_highlight"
+                        data-hotkey="x"
+                        confirm="For some of the parts, there is a difference between the initial demand and the actual quantity that was used. Are you sure you want to confirm ?"/>
+            </xpath>
             
             <!-- Add parts approval information in the header -->
             <xpath expr="//field[@name='state']" position="before">
                 <field name="parts_approved" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,confirmed,parts_approved,under_repair,transferred,returned,failed,done</attribute>
             </xpath>
             
             <!-- Add approval details after partner_id -->

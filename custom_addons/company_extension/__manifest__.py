@@ -6,6 +6,7 @@
     'depends': ['base','stock', 'product', 'repair', 'hr'],
     'data': [
         'security/ir.model.access.csv',
+        'security/stock_lot_rule_override.xml',
         'security/program_project.xml',
         'views/res_company_views.xml',
         'views/stock_production_lot_views.xml',
@@ -15,6 +16,7 @@
         'views/programs_and_projects_views.xml',
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
+    'views/repair_request_wizard_views.xml',
         'views/ministry_terminology.xml',
         'report/repair_order_reports.xml',
         'report/repair_order_templates.xml',

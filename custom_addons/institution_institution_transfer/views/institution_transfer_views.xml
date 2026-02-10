@@ -11,6 +11,7 @@
                 <field name="source_location_id"/>
                 <field name="dest_company_id"/>
                 <field name="dest_location_id"/>
+                <field name="quantity"/>
                 <field name="state"/>
             </list>
         </field>

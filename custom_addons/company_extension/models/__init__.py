@@ -10,3 +10,5 @@ from . import oe_program
 from . import oe_project
 from . import repair_fee
 from . import repair_order
+from . import repair_transfer_request
+from . import repair_return_request

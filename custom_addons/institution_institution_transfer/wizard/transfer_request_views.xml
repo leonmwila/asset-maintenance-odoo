@@ -8,6 +8,12 @@
                 <group>
                     <field name="dest_company_id" string="Institution"/>
                     <field name="dest_location_id" string="Location"/>
+                    <label for="quantity"/>
+                    <div class="o_row">
+                        <field name="quantity" readonly="not is_spares"/>
+                        <span class="o_form_label">Max</span>
+                        <field name="max_qty" readonly="1" class="oe_inline" nolabel="1"/>
+                    </div>
                 </group>
                 <footer>
                     <button name="action_confirm" type="object" string="Confirm" class="btn-primary"/>
