@@ -9,6 +9,7 @@
             <!-- Add Model field in General Information -->
             <xpath expr="//field[@name='categ_id']" position="after">
                 <field name="model"/>
+                <field name="make"/>
             </xpath>
         </field>
     </record>

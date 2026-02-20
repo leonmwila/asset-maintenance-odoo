@@ -125,9 +125,9 @@
                                         <tr>
                                             <td><t t-esc="row_index"/></td>
                                             <td><t t-esc="line.grz_number or ''"/></td>
-                                            <td><t t-esc="line.product_id.categ_id.name or ''"/></td>
+                                            <td><t t-esc="line.category_2_id.name or ''"/></td>
                                             <td><t t-esc="line.name"/></td>
-                                            <td><t t-esc="line.vehicle_make or ''"/></td>
+                                            <td><t t-esc="line.product_id.product_tmpl_id.make or ''"/></td>
                                             <td><t t-esc="line.product_model or ''"/></td>
                                             <td><t t-esc="line.create_date.strftime('%d/%m/%Y') if line.create_date else ''"/></td>
                                             <td><t t-esc="line.district_id.name if line.district_id else ''"/></td>
