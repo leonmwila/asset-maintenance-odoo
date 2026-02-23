@@ -64,7 +64,8 @@
                 <attribute name="invisible">state != 'confirmed' and state != 'parts_approved' or (move_ids and not parts_approved)</attribute>
             </xpath>
 
-            <xpath expr="//button[@name='action_repair_end']" position="replace"/>
+            <xpath expr="//button[@name='action_repair_end' and contains(@invisible, 'not has_uncomplete_moves')]" position="replace"/>
+            <xpath expr="//button[@name='action_repair_end' and contains(@invisible, 'has_uncomplete_moves')]" position="replace"/>
             <xpath expr="//header" position="inside">
                 <button name="action_open_end_repair_wizard"
                         invisible="state not in ('under_repair', 'returned')"
@@ -88,6 +89,16 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="parts_approved_by" readonly="1" invisible="not parts_approved"/>
                 <field name="parts_approved_date" readonly="1" invisible="not parts_approved"/>
+            </xpath>
+
+            <!-- Allow selecting source location for parts used in repair -->
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="location_id" string="Pick From" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+            </xpath>
+
+            <!-- Replace single Responsible with multi-user Responsible -->
+            <xpath expr="//field[@name='user_id']" position="replace">
+                <field name="responsible_user_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
             </xpath>
             
             <!-- Add Operations/Services tab after Parts tab -->

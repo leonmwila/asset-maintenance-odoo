@@ -59,6 +59,17 @@ class RepairOrder(models.Model):
     parts_approved = fields.Boolean(string="Parts Approved", default=False, tracking=True)
     parts_approved_by = fields.Many2one('res.users', string="Parts Approved By", readonly=True, tracking=True)
     parts_approved_date = fields.Datetime(string="Parts Approval Date", readonly=True, tracking=True)
+    responsible_user_ids = fields.Many2many(
+        'res.users',
+        'repair_order_responsible_user_rel',
+        'repair_id',
+        'user_id',
+        string='Responsible',
+        tracking=True,
+        domain="[('share', '=', False)]",
+        default=lambda self: [(6, 0, [self.env.user.id])],
+        help='Users responsible for this repair order.'
+    )
 
     transfer_request_ids = fields.One2many('repair.transfer.request', 'repair_id', string='Transfer Requests')
     return_request_ids = fields.One2many('repair.return.request', 'repair_id', string='Return Requests')
@@ -93,6 +104,32 @@ class RepairOrder(models.Model):
     ], string='Payment Method', tracking=True)
     payment_reference = fields.Char(string='Payment Reference', tracking=True)
     received_by = fields.Many2one('res.users', string='Received By', tracking=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('responsible_user_ids') and not vals.get('user_id'):
+                command = vals['responsible_user_ids']
+                if command and command[0][0] == 6 and command[0][2]:
+                    vals['user_id'] = command[0][2][0]
+            elif vals.get('user_id') and not vals.get('responsible_user_ids'):
+                vals['responsible_user_ids'] = [(6, 0, [vals['user_id']])]
+        records = super().create(vals_list)
+        for repair in records.filtered(lambda r: r.user_id and not r.responsible_user_ids):
+            repair.responsible_user_ids = [(6, 0, [repair.user_id.id])]
+        return records
+
+    def write(self, vals):
+        result = super().write(vals)
+        if 'responsible_user_ids' in vals:
+            for repair in self:
+                if repair.responsible_user_ids:
+                    repair.user_id = repair.responsible_user_ids[0].id
+        elif 'user_id' in vals:
+            for repair in self.filtered('user_id'):
+                if repair.user_id not in repair.responsible_user_ids:
+                    repair.responsible_user_ids = [(4, repair.user_id.id)]
+        return result
     
     @api.depends('fees_lines.price_subtotal')
     def _compute_fees_amount(self):
@@ -308,17 +345,27 @@ class RepairOrder(models.Model):
                     consumed_lines.append(f"{product.display_name}: {qty:g} {product.uom_id.name}")
                     continue
 
-                move_lines = move.move_line_ids.filtered(lambda line: line.lot_id and line.quantity)
+                move_lines = move.move_line_ids.filtered(
+                    lambda line: line.lot_id and (line.quantity or line.quantity_product_uom)
+                )
                 if move_lines:
                     for line in move_lines:
-                        line_qty = line.product_uom_id._compute_quantity(line.quantity, product.uom_id)
+                        line_qty = line.quantity_product_uom or line.product_uom_id._compute_quantity(line.quantity, product.uom_id)
                         Quant._update_available_quantity(product, location, -line_qty, lot_id=line.lot_id)
                         consumed_lines.append(
                             f"{product.display_name} - {line.lot_id.name}: {line_qty:g} {product.uom_id.name}"
                         )
                     continue
 
-                lots = move.lot_ids
+                lots = move.move_line_ids.mapped('lot_id') | move.lot_ids
+                if not lots:
+                    tracked_quants = Quant.search([
+                        ('product_id', '=', product.id),
+                        ('location_id', '=', location.id),
+                        ('lot_id', '!=', False),
+                        ('quantity', '>', 0),
+                    ])
+                    lots = tracked_quants.mapped('lot_id')
                 if not lots:
                     raise UserError(_("Lot/Serial is required to consume tracked spare: %s") % product.display_name)
 
