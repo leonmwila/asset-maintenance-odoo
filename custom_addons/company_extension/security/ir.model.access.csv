@@ -12,3 +12,5 @@ access_repair_return_request_user,repair.return.request user,model_repair_return
 access_repair_transfer_request_wizard_user,repair.transfer.request.wizard user,model_repair_transfer_request_wizard,base.group_user,1,1,1,1
 access_repair_return_request_wizard_user,repair.return.request.wizard user,model_repair_return_request_wizard,base.group_user,1,1,1,1
 access_repair_end_wizard_user,repair.end.wizard user,model_repair_end_wizard,base.group_user,1,1,1,1
+access_repair_spare_part_request_user,repair.spare.part.request user,model_repair_spare_part_request,base.group_user,1,1,1,1
+access_repair_spare_part_request_line_user,repair.spare.part.request.line user,model_repair_spare_part_request_line,base.group_user,1,1,1,1

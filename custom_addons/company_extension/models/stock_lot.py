@@ -6,7 +6,7 @@ class StockLot(models.Model):
 
     # Override field labels for UI display (must include comodel_name for Many2one fields)
     name = fields.Char(string='Serial Number')
-    product_id = fields.Many2one('product.product', string='Description')
+    product_id = fields.Many2one('product.product', string='Asset')
     company_id = fields.Many2one('res.company', string='Institution')
     
     grz_number = fields.Char(string='GRZ Number', required=False)

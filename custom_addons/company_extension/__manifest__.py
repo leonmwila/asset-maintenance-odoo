@@ -14,6 +14,7 @@
         'views/product_category_2_views.xml',
         'views/product_template_views.xml',
         'views/programs_and_projects_views.xml',
+        'views/repair_spare_part_request_views.xml',
         'views/technician_menus.xml',
         'views/repair_order_views.xml',
         'views/repair_request_wizard_views.xml',

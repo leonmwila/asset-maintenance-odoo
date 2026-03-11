@@ -40,6 +40,11 @@ class StockLot(models.Model):
         string='Fair Value',
         help='Initial fair value or acquisition cost of the asset'
     )
+
+    lot_acquisition_price = fields.Float(
+        string='Acquisition Price',
+        help='Acquisition price for this specific lot/serial. If empty, product acquisition price is used for depreciation.'
+    )
     
     disposal_date = fields.Date(
         string='Disposal Date',
@@ -62,21 +67,23 @@ class StockLot(models.Model):
         string='Net Book Value (NBV)',
         compute='_compute_depreciation',
         store=True,
-        help='Net Book Value = Fair Value - Depreciation Amount'
+        help='Net Book Value = Depreciation Base - Depreciation Amount'
     )
     
-    @api.depends('fair_value', 'disposal_price', 'disposal_date', 'product_id.product_tmpl_id.depreciation_method', 
+    @api.depends('lot_acquisition_price', 'product_id.standard_price', 'disposal_price', 'disposal_date', 'product_id.product_tmpl_id.depreciation_method', 
                  'product_id.product_tmpl_id.useful_life', 'acquisition_date')
     def _compute_depreciation(self):
         """Calculate depreciation amount and NBV based on product's depreciation method and useful life"""
         for lot in self:
             depreciation_amount = 0.0
             nbv = 0.0
+
+            depreciation_base = lot.lot_acquisition_price if lot.lot_acquisition_price not in (False, None) else (lot.product_id.standard_price or 0.0)
             
             # Only calculate if we have the required values
             # Access product template through product_id.product_tmpl_id
             product_template = lot.product_id.product_tmpl_id if lot.product_id else False
-            if lot.fair_value and product_template and product_template.depreciation_method and product_template.useful_life:
+            if depreciation_base > 0 and product_template and product_template.depreciation_method and product_template.useful_life:
                 method = product_template.depreciation_method
                 useful_life = product_template.useful_life
                 
@@ -101,8 +108,8 @@ class StockLot(models.Model):
                     
                     # Calculate depreciation based on method
                     if method == 'straight_line':
-                        # Straight-line: (Fair Value - Disposal Price) / Useful Life * Years Elapsed
-                        depreciable_amount = lot.fair_value - (lot.disposal_price or 0.0)
+                        # Straight-line: (Depreciation Base - Disposal Price) / Useful Life * Years Elapsed
+                        depreciable_amount = depreciation_base - (lot.disposal_price or 0.0)
                         if useful_life > 0:
                             annual_depreciation = depreciable_amount / useful_life
                             depreciation_amount = annual_depreciation * years_elapsed
@@ -112,7 +119,7 @@ class StockLot(models.Model):
                         # Rate = 2 / Useful Life
                         if useful_life > 0:
                             rate = 2.0 / useful_life
-                            book_value = lot.fair_value
+                            book_value = depreciation_base
                             for year in range(int(years_elapsed)):
                                 year_depreciation = book_value * rate
                                 book_value -= year_depreciation
@@ -125,7 +132,7 @@ class StockLot(models.Model):
                     elif method == 'sum_of_years':
                         # Sum of Years Digits
                         if useful_life > 0:
-                            depreciable_amount = lot.fair_value - (lot.disposal_price or 0.0)
+                            depreciable_amount = depreciation_base - (lot.disposal_price or 0.0)
                             sum_of_years = useful_life * (useful_life + 1) / 2
                             for year in range(int(years_elapsed)):
                                 remaining_life = useful_life - year
@@ -140,14 +147,14 @@ class StockLot(models.Model):
                     elif method == 'units_of_production':
                         # Units of Production - simplified version
                         # This would typically require production units, but we'll use a simplified calculation
-                        depreciable_amount = lot.fair_value - (lot.disposal_price or 0.0)
+                        depreciable_amount = depreciation_base - (lot.disposal_price or 0.0)
                         if useful_life > 0:
                             # Assume years_elapsed represents "units" in this simplified version
                             depreciation_amount = (depreciable_amount / useful_life) * years_elapsed
             
             # Calculate NBV
-            if lot.fair_value:
-                nbv = lot.fair_value - depreciation_amount
+            if depreciation_base > 0:
+                nbv = depreciation_base - depreciation_amount
                 # NBV should not be negative
                 nbv = max(0.0, nbv)
             

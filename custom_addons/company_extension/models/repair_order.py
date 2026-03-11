@@ -73,6 +73,7 @@ class RepairOrder(models.Model):
 
     transfer_request_ids = fields.One2many('repair.transfer.request', 'repair_id', string='Transfer Requests')
     return_request_ids = fields.One2many('repair.return.request', 'repair_id', string='Return Requests')
+    spare_part_request_id = fields.Many2one('repair.spare.part.request', string='Spare Part Request', readonly=True, copy=False)
     has_pending_transfer_request = fields.Boolean(compute='_compute_pending_requests')
     has_pending_return_request = fields.Boolean(compute='_compute_pending_requests')
     
@@ -255,6 +256,7 @@ class RepairOrder(models.Model):
             if not repair.move_ids:
                 raise UserError(_("Please add parts to repair before approving."))
             repair._reserve_spares_moves()
+            repair._create_spare_part_request()
             repair.write({
                 'parts_approved': True,
                 'parts_approved_by': self.env.user.id,
@@ -262,6 +264,48 @@ class RepairOrder(models.Model):
                 'state': 'parts_approved'
             })
         return True
+
+    def _create_spare_part_request(self):
+        """Create a Spare Part Request record when parts are approved.
+
+        This is an approval/pickup tracking record only. It does not perform stock moves.
+        """
+        self.ensure_one()
+
+        if self.spare_part_request_id and self.spare_part_request_id.state != 'cancelled':
+            return self.spare_part_request_id
+
+        spares_moves = self.move_ids.filtered(
+            lambda m: m.repair_line_type == 'add'
+            and m.product_id
+            and getattr(m.product_id, 'type', False) == 'spares'
+            and m.product_uom_qty
+        )
+        if not spares_moves:
+            return False
+
+        technician_user = self.responsible_user_ids[:1] if self.responsible_user_ids else self.user_id
+        line_values = []
+        for move in spares_moves:
+            line_values.append((0, 0, {
+                'product_id': move.product_id.id,
+                'qty': move.product_uom_qty,
+                'product_uom_id': move.product_uom.id or move.product_id.uom_id.id,
+                'repair_move_id': move.id,
+            }))
+
+        request = self.env['repair.spare.part.request'].create({
+            'repair_id': self.id,
+            'requested_by': technician_user.id if technician_user else self.env.user.id,
+            'approved_by': self.env.user.id,
+            'approved_date': fields.Datetime.now(),
+            'state': 'approved',
+            'line_ids': line_values,
+        })
+
+        self.spare_part_request_id = request.id
+        self.message_post(body=_("Spare Part Request created: %s") % request.display_name)
+        return request
     
     def action_repair_start(self):
         """Override to check parts approval before starting repair"""
